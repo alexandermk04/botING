@@ -5,9 +5,14 @@ import re
 class MensaScraper:
     page_to_scrape = None
     soup: BeautifulSoup = None
+    day: str
 
-    def __init__(self):
-        self.page_to_scrape = requests.get("https://www.stwhh.de/speiseplan?t=today#c19095")
+    def __init__(self, day="heute"):
+        self.day = day
+        if self.day == "morgen":
+            self.page_to_scrape = requests.get("https://www.stwhh.de/speiseplan?t=next_day")
+        else:
+            self.page_to_scrape = requests.get("https://www.stwhh.de/speiseplan?t=today")
         if self.page_to_scrape:
             self.soup = BeautifulSoup(self.page_to_scrape.text, "html.parser")
         else:
@@ -22,7 +27,8 @@ class MensaScraper:
         for meal_block in meals_blocks:
             meal_info = self.extract_meal_info(meal_block)
             meals.append(meal_info)
-        return meals
+        response = self.format_meals(meals)
+        return response
 
     def find_correct_location(self):
         rows = self.soup.find_all("div", class_="container-fluid px-0 tx-epwerkmenu-menu-location-container")
@@ -54,3 +60,15 @@ class MensaScraper:
     
     def clean_meal_name(self, meal_name):
         return re.sub(r'\s*\([^)]*\)', '', meal_name)
+    
+    def format_meals(self, meals: list[dict]) -> str:
+        start_message = f"Hier sind die Gerichte für {self.day}:\n\n"
+        meal_messages = [self.format_single_meal(meal) for meal in meals]
+        response = start_message + "\n".join(meal_messages)
+        return response
+
+    def format_single_meal(self, meal: dict) -> str:
+        if meal["price"] == "0,75 €":
+            return f"**Pasta & Gemüsebar ({meal['price']} / 100g):**\n{meal['name']}\n"
+        else:
+            return f"**{meal['name']}**\n{meal['price']}\n"

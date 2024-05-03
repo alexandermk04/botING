@@ -27,9 +27,12 @@ class ExamScraper:
     def find_exam(self, message):
         relevant = self.find_relevant(message)
         if relevant:
+            exams = []
             most_relevant = self.most_relevant(relevant, message)
-            extracted_date = most_relevant[1].find("td", class_="middle")
-            return most_relevant[0].text, extracted_date.text
+            for name, date in most_relevant:
+                extracted_date = date.find("td", class_="middle")
+                exams.append((name.text, extracted_date.text))
+            return exams
         return None
     
     def find_relevant(self, message):
@@ -41,16 +44,16 @@ class ExamScraper:
             for i, name in enumerate(names):
                 if chunk in name.text.lower():
                     relevant.append((name, dates[i]))
-                    print(name.text)
         return relevant
     
     def most_relevant(self, relevant, message):
         tokenized_names = [name.text.lower().split(" ") for name, _ in relevant]
         bm25 = BM25Okapi(tokenized_names)
         scores = bm25.get_scores(message.lower().split(" "))
-        index_max = np.argmax(scores)
+        pairing = list(zip(relevant, scores))
+        sorted_pairing = sorted(pairing, key=lambda x: x[1], reverse=True)
 
-        return relevant[index_max]
+        return [pair[0] for pair in sorted_pairing][:5]
 
     
     def extract_info(self):
