@@ -5,4 +5,6 @@ COPY . /mensa_scraper
 
 RUN pip install -r requirements.txt
 
+HEALTHCHECK NONE
+
 CMD ["python", "main.py"]
