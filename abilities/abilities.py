@@ -1,5 +1,4 @@
 from basic_functions import send_message, send_file
-from ai_models.phi_3 import prompt_chat, phi_3_answer
 from abilities.exams import ExamScraper
 from abilities.mensa import MensaScraper
 from config import PLAN_PATH
@@ -13,7 +12,16 @@ class BaseAbility:
 
 class Conversation(BaseAbility):
     async def execute(self, recipient, user_message, **kwargs):
-        await phi_3_answer(recipient, user_message)
+        await send_message(recipient, "AI is not available at the moment.")
+
+class ShowHelp(BaseAbility):
+    async def execute(self, recipient, **kwargs):
+        await send_message(recipient, "Probiere einen der folgenden Commands aus:\n"
+                                      "!prüfungen verfügbar\n"
+                                      "!prüfungstermine\n"
+                                      "!mensa heute\n"
+                                      "!mensa morgen\n"
+                                      "!campus")
 
 class ExamAvailability(BaseAbility):
     async def execute(self, recipient, **kwargs):
@@ -31,8 +39,8 @@ class ExamDates(BaseAbility):
         if exams:
             prompt = "Supply the user with the most relevant exam date as well as the name of the following:"
             exams_string = "\n".join([f"{exam[0]} at {exam[1]}" for exam in exams])
-            response = prompt_chat(prompt + exams_string, user_message)
-            await send_message(recipient, response)
+            #response = prompt_chat(prompt + exams_string, user_message)
+            await send_message(recipient, exams_string)
 
 class MealsToday(BaseAbility):
 

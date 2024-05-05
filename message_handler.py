@@ -1,7 +1,6 @@
 import logging
 
-from abilities.abilities import ABILITIES
-from ai_models.phi_3 import prompt_chat
+from abilities.abilities import ABILITIES, ShowHelp
 from basic_functions import send_message
 
 Logger = logging.getLogger(__name__)
@@ -26,7 +25,7 @@ class MessageHandler:
         self.channel = str(message.channel)
         self.message = message
 
-        print(f"{self.username} said {self.user_message} in {self.channel}")
+        Logger.info(f"{self.username} said {self.user_message} in {self.channel}")
 
         self.recognize_type()
 
@@ -60,6 +59,9 @@ class MessageHandler:
         return command   
         
     def recognize_ability(self):
+        return ShowHelp()
+
+        """
         response = prompt_chat(INTENT_PROMPT, self.user_message)
         if response == "None":
             return None
@@ -69,6 +71,7 @@ class MessageHandler:
             except KeyError as e:
                 logging.error(e)
                 return None
+        """
 
     
 
