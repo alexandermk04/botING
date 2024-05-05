@@ -43,7 +43,8 @@ class MessageHandler:
         if self.type == "command":
             command = self.recognize_command()
             if command:
-                return await command.execute(recipient=self.message.channel)
+                return await command.execute(recipient=self.message.channel,
+                                             user_message=self.user_message)
         else:
             ability = self.recognize_ability()
             if ability:
