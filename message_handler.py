@@ -45,6 +45,8 @@ class MessageHandler:
             if command:
                 return await command.execute(recipient=self.message.channel,
                                              user_message=self.user_message)
+            else:
+                return await send_message(self.message.channel, "Sorry, ich kann dir leider nicht helfen.")
         else:
             ability = self.recognize_ability()
             if ability:
