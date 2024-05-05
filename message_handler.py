@@ -1,8 +1,10 @@
-from rank_bm25 import BM25Okapi
-import numpy as np
+import logging
 
 from abilities.abilities import ABILITIES
-from ai_anthropic import ai_answer, prompt_chat
+from ai_models.phi_3 import prompt_chat
+from basic_functions import send_message
+
+Logger = logging.getLogger(__name__)
 
 CHANNELS = ["bot-ing", "Direct Message with Unknown User"]
 
@@ -49,7 +51,7 @@ class MessageHandler:
                 return await ability.execute(recipient=self.message.channel,
                                               user_message=self.user_message)
             else:
-                return await ai_answer(self.message.channel, self.user_message)
+                return await send_message(self.message.channel, "Sorry, ich kann dir leider nicht helfen.")
         
     def recognize_command(self):
         cleaned_message = self.user_message[1:].strip()
@@ -65,7 +67,7 @@ class MessageHandler:
             try:
                 return ABILITIES.get(response)
             except KeyError as e:
-                print(e)
+                logging.error(e)
                 return None
 
     

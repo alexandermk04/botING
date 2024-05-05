@@ -1,7 +1,8 @@
 from basic_functions import send_message, send_file
-from ai_anthropic import prompt_chat
+from ai_models.phi_3 import prompt_chat, phi_3_answer
 from abilities.exams import ExamScraper
 from abilities.mensa import MensaScraper
+from config import PLAN_PATH
 
 class BaseAbility:
     def __init__(self) -> None:
@@ -9,6 +10,10 @@ class BaseAbility:
 
     async def execute(self, recipient, **kwargs):
         pass
+
+class Conversation(BaseAbility):
+    async def execute(self, recipient, user_message, **kwargs):
+        await phi_3_answer(recipient, user_message)
 
 class ExamAvailability(BaseAbility):
     async def execute(self, recipient, **kwargs):
@@ -41,7 +46,13 @@ class MealsTomorrow(BaseAbility):
         meals = MensaScraper("morgen").get_meals()
         await send_message(recipient, meals)
 
+class Plan(BaseAbility):
+    async def execute(self, recipient, user_message, **kwargs):
+        await send_file(recipient, "Hier ist der Campusplan:", PLAN_PATH)
+
 ABILITIES = {"prüfungen verfügbar": ExamAvailability(),
              "prüfungstermine": ExamDates(),
              "mensa heute": MealsToday(),
-             "mensa morgen": MealsTomorrow()}
+             "mensa morgen": MealsTomorrow(),
+             "conversation": Conversation(),
+             "campus": Plan()}

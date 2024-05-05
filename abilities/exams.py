@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 from rank_bm25 import BM25Okapi
-import numpy as np
 import requests
 import re
 

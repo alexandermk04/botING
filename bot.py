@@ -1,7 +1,6 @@
 import discord
 
-from config import DISCORD_TOKEN, PLAN_PATH
-from basic_functions import send_message, send_file
+from config import DISCORD_TOKEN
 from message_handler import MessageHandler
 
 def run_discord_bot():
