@@ -2,8 +2,6 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
-from logging import logger
-
 WEEK = "s03"
 
 GROUP = "G7"
@@ -26,9 +24,9 @@ class EvaluationScraper:
         if self.page_to_scrape:
             self.soup = BeautifulSoup(self.page_to_scrape.text, "html.parser")
         else:
-            logger.info("Error while fetching page")
+            print("Error fetching page.")
 
-    def get_evaluations(self):
+    def get_evaluation(self):
         if not self.soup:
             return None
         evaluation, points = self.extract_evaluation()

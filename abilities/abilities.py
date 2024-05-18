@@ -44,9 +44,9 @@ class ExamDates(BaseAbility):
             await send_message(recipient, exams_string)
 
 class OOPEvaluation(BaseAbility):
-    async def execute(self, recipient, user_message, **kwargs):
-        await send_message(f"Suche nach Evaluation für {recipient}. Dies kann etwas dauern...")
-        response = EvaluationScraper(recipient).extract_evaluation()
+    async def execute(self, recipient, username, **kwargs):
+        await send_message(recipient, f"Suche nach Evaluation für {username}. Dies kann etwas dauern...")
+        response = EvaluationScraper(username).get_evaluation()
         await send_message(recipient, response)
 
 class MealsToday(BaseAbility):
@@ -62,7 +62,7 @@ class MealsTomorrow(BaseAbility):
         await send_message(recipient, meals)
 
 class Plan(BaseAbility):
-    async def execute(self, recipient, user_message, **kwargs):
+    async def execute(self, recipient, **kwargs):
         await send_file(recipient, "Hier ist der Campusplan:", PLAN_PATH)
 
 ABILITIES = {"prüfungen verfügbar": ExamAvailability(),
