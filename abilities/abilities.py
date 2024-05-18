@@ -1,6 +1,7 @@
 from basic_functions import send_message, send_file
 from abilities.exams import ExamScraper
 from abilities.mensa import MensaScraper
+from abilities.evaluation import EvaluationScraper
 from config import PLAN_PATH
 
 class BaseAbility:
@@ -42,6 +43,12 @@ class ExamDates(BaseAbility):
             #response = prompt_chat(prompt + exams_string, user_message)
             await send_message(recipient, exams_string)
 
+class OOPEvaluation(BaseAbility):
+    async def execute(self, recipient, user_message, **kwargs):
+        await send_message(f"Suche nach Evaluation für {recipient}. Dies kann etwas dauern...")
+        response = EvaluationScraper(recipient).extract_evaluation()
+        await send_message(recipient, response)
+
 class MealsToday(BaseAbility):
 
     async def execute(self, recipient, **kwargs):
@@ -60,6 +67,7 @@ class Plan(BaseAbility):
 
 ABILITIES = {"prüfungen verfügbar": ExamAvailability(),
              "prüfungstermine": ExamDates(),
+             "oop": OOPEvaluation(),
              "mensa heute": MealsToday(),
              "mensa morgen": MealsTomorrow(),
              "conversation": Conversation(),
