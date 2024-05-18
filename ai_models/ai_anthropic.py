@@ -1,7 +1,7 @@
 import anthropic
 
 from config import ANTHROPIC
-from basic_functions import send_message
+from bot.basic_functions import send_message
 
 SYSTEM_PROMPT = "Respond the shortest way possible."
 

@@ -1,6 +1,6 @@
 from abilities.abilities import ABILITIES, ShowHelp
-from basic_functions import send_message
-
+from bot.basic_functions import send_message
+from ai_models.ai_anthropic import prompt_chat
 from logging import logger
 
 CHANNELS = ["bot-ing", "Direct Message with Unknown User"]
@@ -44,7 +44,7 @@ class MessageHandler:
                 return await command.execute(recipient=self.message.channel,
                                              user_message=self.user_message)
             else:
-                return await send_message(self.message.channel, "Sorry, ich kann dir leider nicht helfen.")
+                return await ShowHelp().execute(recipient=self.message.channel)
         else:
             ability = self.recognize_ability()
             if ability:
@@ -60,9 +60,6 @@ class MessageHandler:
         return command   
         
     def recognize_ability(self):
-        return ShowHelp()
-
-        """
         response = prompt_chat(INTENT_PROMPT, self.user_message)
         if response == "None":
             return None
@@ -70,9 +67,8 @@ class MessageHandler:
             try:
                 return ABILITIES.get(response)
             except KeyError as e:
-                logging.error(e)
+                logger.error(e)
                 return None
-        """
 
     
 

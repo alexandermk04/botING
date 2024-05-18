@@ -1,4 +1,4 @@
-from basic_functions import send_message, send_file
+from bot.basic_functions import send_message, send_file
 from abilities.exams import ExamScraper
 from abilities.mensa import MensaScraper
 from config import PLAN_PATH
