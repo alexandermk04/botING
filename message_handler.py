@@ -1,9 +1,7 @@
-import logging
-
 from abilities.abilities import ABILITIES, ShowHelp
 from basic_functions import send_message
 
-Logger = logging.getLogger(__name__)
+from logging import logger
 
 CHANNELS = ["bot-ing", "Direct Message with Unknown User"]
 
@@ -25,7 +23,7 @@ class MessageHandler:
         self.channel = str(message.channel)
         self.message = message
 
-        Logger.info(f"{self.username} said {self.user_message} in {self.channel}")
+        logger.info(f"{self.username} said {self.user_message} in {self.channel}")
 
         self.recognize_type()
 
