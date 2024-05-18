@@ -1,33 +1,52 @@
 from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
 import requests
 import re
 
-WEEK = "s03"
+WEEK = "03"
 
-GROUP = "G7"
+class DiscordUser():
+    tag: str
+    group: str
+    group_name: str
 
-GROUP_NAME = "BogoSort"
+    def __init__(self, tag: str, group: str, group_name: str):
+        self.tag = tag
+        self.group = group
+        self.group_name = group_name
 
 DISCORD_TO_TAG = {
-    "bl3x": "cnm5281",
-    "sixseveneight": "cci0492",
+    "bl3x": DiscordUser("cnm5281", "G7", "BogoSort"),
+    "sixseveneight": DiscordUser("cci0492", "G7", "BogoSort"),
+    "eagleplay.exe": DiscordUser("cgj4967", "G7", "BogoSort"),
 }
 
-# !! Implement API call instead of scraping the page
+def get_week():
+    current_date = datetime.now()
+    
+    # Remember to update as holidays are added
+    delta_days = (current_date - datetime(2024, 5, 19)).days
+    
+    weeks_passed = delta_days // 7
+
+    print(weeks_passed)
+
+    return str(4 + weeks_passed).zfill(2)
+
 
 class EvaluationScraper:
     
     def __init__(self, user):
-        self.discord_user = DISCORD_TO_TAG.get(user)
-        # potentially add more sophisticated group name determination
-        self.page_to_scrape = requests.get(f"https://oopy.teluapps.com/evals/{GROUP}/{GROUP_NAME}/{self.discord_user}/{WEEK}")
+        self.discord_user = DISCORD_TO_TAG.get(user)    # potentially add more sophisticated group name determination
+        week = get_week()
+        self.page_to_scrape = requests.get(f"https://oopy.teluapps.com/evals/{self.discord_user.group}/{self.discord_user.group_name}/{self.discord_user.tag}/s{week}")
         if self.page_to_scrape:
             self.soup = BeautifulSoup(self.page_to_scrape.text, "html.parser")
         else:
             print("Error fetching page.")
 
     def get_evaluation(self):
-        if not self.soup:
+        if not self.soup or not self.discord_user:
             return None
         evaluation, points = self.extract_evaluation()
         response = self.format_evaluation(evaluation, points)
