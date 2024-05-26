@@ -25,11 +25,9 @@ def get_week():
     current_date = datetime.now()
     
     # Remember to update as holidays are added
-    delta_days = (current_date - datetime(2024, 5, 19)).days
+    delta_days = (current_date - datetime(2024, 5, 26)).days
     
     weeks_passed = delta_days // 7
-
-    print(weeks_passed)
 
     return str(4 + weeks_passed).zfill(2)
 
@@ -38,8 +36,8 @@ class EvaluationScraper:
     
     def __init__(self, user):
         self.discord_user = DISCORD_TO_TAG.get(user)    # potentially add more sophisticated group name determination
-        week = get_week()
-        self.page_to_scrape = requests.get(f"https://oopy.teluapps.com/evals/{self.discord_user.group}/{self.discord_user.group_name}/{self.discord_user.tag}/s{week}")
+        self.week = get_week()
+        self.page_to_scrape = requests.get(f"https://oopy.teluapps.com/evals/{self.discord_user.group}/{self.discord_user.group_name}/{self.discord_user.tag}/s{self.week}")
         if self.page_to_scrape:
             self.soup = BeautifulSoup(self.page_to_scrape.text, "html.parser")
         else:
@@ -59,7 +57,7 @@ class EvaluationScraper:
         return [item.text for item in extracted_evaluation], points.text
     
     def format_evaluation(self, evaluation, points):
-        response = f"**Evaluation von {self.discord_user} für Aufgabe {WEEK.upper()}**\n"
+        response = f"**Evaluation von {self.discord_user.tag} für Aufgabe {self.week}**\n"
         for item in evaluation:
             response += f"- {item}\n"
         response += f"\n**Punkte**: {points}"
