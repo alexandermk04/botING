@@ -1,9 +1,10 @@
 import logging
 
 from abilities.abilities import ABILITIES, ShowHelp
-from basic_functions import send_message
+from bot.basic_functions import send_message
+from ai_models.ai_anthropic import prompt_chat, ai_answer
 
-Logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 CHANNELS = ["bot-ing", "Direct Message with Unknown User"]
 
@@ -21,11 +22,11 @@ class MessageHandler:
 
     def __init__(self, message):
         self.username = str(message.author)
-        self.user_message = str(message.content)
+        self.user_message = str(message.content)[:200]
         self.channel = str(message.channel)
         self.message = message
 
-        Logger.info(f"{self.username} said {self.user_message} in {self.channel}")
+        logger.info(f"{self.username} said {self.user_message} in {self.channel}")
 
         self.recognize_type()
 
@@ -37,7 +38,7 @@ class MessageHandler:
 
     async def answer(self):
         if self.channel not in CHANNELS:
-            print(f"{self.channel} not allowed.")
+            logger.info(f"{self.channel} not allowed.")
             return
         
         if self.type == "command":
@@ -47,7 +48,7 @@ class MessageHandler:
                                              user_message=self.user_message,
                                              username=self.username)
             else:
-                return await send_message(self.message.channel, "Sorry, ich kann dir leider nicht helfen.")
+                return await ShowHelp().execute(recipient=self.message.channel)
         else:
             ability = self.recognize_ability()
             if ability:
@@ -55,7 +56,7 @@ class MessageHandler:
                                               user_message=self.user_message,
                                               username=self.username)
             else:
-                return await send_message(self.message.channel, "Sorry, ich kann dir leider nicht helfen.")
+                return await ai_answer(recipient=self.message.channel, user_message=self.user_message)
         
     def recognize_command(self):
         cleaned_message = self.user_message[1:].strip()
@@ -64,9 +65,6 @@ class MessageHandler:
         return command   
         
     def recognize_ability(self):
-        return ShowHelp()
-
-        """
         response = prompt_chat(INTENT_PROMPT, self.user_message)
         if response == "None":
             return None
@@ -74,9 +72,8 @@ class MessageHandler:
             try:
                 return ABILITIES.get(response)
             except KeyError as e:
-                logging.error(e)
+                logger.error(e)
                 return None
-        """
 
     
 
