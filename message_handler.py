@@ -1,7 +1,10 @@
+import logging
+
 from abilities.abilities import ABILITIES, ShowHelp
 from bot.basic_functions import send_message
-from ai_models.ai_anthropic import prompt_chat
-from logging import logger
+from ai_models.ai_anthropic import prompt_chat, ai_answer
+
+logger = logging.getLogger(__name__)
 
 CHANNELS = ["bot-ing", "Direct Message with Unknown User"]
 
@@ -19,7 +22,7 @@ class MessageHandler:
 
     def __init__(self, message):
         self.username = str(message.author)
-        self.user_message = str(message.content)
+        self.user_message = str(message.content)[:200]
         self.channel = str(message.channel)
         self.message = message
 
@@ -35,7 +38,7 @@ class MessageHandler:
 
     async def answer(self):
         if self.channel not in CHANNELS:
-            print(f"{self.channel} not allowed.")
+            logger.info(f"{self.channel} not allowed.")
             return
         
         if self.type == "command":
@@ -51,7 +54,7 @@ class MessageHandler:
                 return await ability.execute(recipient=self.message.channel,
                                               user_message=self.user_message)
             else:
-                return await send_message(self.message.channel, "Sorry, ich kann dir leider nicht helfen.")
+                return await ai_answer(recipient=self.message.channel, user_message=self.user_message)
         
     def recognize_command(self):
         cleaned_message = self.user_message[1:].strip()

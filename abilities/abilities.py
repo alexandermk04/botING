@@ -1,4 +1,5 @@
 from bot.basic_functions import send_message, send_file
+from ai_models.ai_anthropic import ai_answer
 from abilities.exams import ExamScraper
 from abilities.mensa import MensaScraper
 from config import PLAN_PATH
@@ -12,7 +13,7 @@ class BaseAbility:
 
 class Conversation(BaseAbility):
     async def execute(self, recipient, user_message, **kwargs):
-        await send_message(recipient, "AI is not available at the moment.")
+        await ai_answer(recipient, user_message)
 
 class ShowHelp(BaseAbility):
     async def execute(self, recipient, **kwargs):

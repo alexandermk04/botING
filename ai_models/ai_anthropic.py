@@ -1,7 +1,10 @@
 import anthropic
+import logging
 
 from config import ANTHROPIC
 from bot.basic_functions import send_message
+
+logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = "Respond the shortest way possible."
 
@@ -15,7 +18,7 @@ def anthropic_chat(user_message: str):
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_message}]
     )
-    print(f"Bot says: {response.content[0].text}")
+    logger.info(f"Bot says: {response.content[0].text}")
     return response.content[0].text
 
 def prompt_chat(prompt: str, user_message: str):
@@ -28,7 +31,7 @@ def prompt_chat(prompt: str, user_message: str):
         system=prompt + SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_message}]
     )
-    print(f"Bot says: {response.content[0].text}")
+    logger.info(f"Bot says: {response.content[0].text}")
     return response.content[0].text
 
 async def ai_answer(recipient, user_message):
