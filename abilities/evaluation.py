@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import requests
 import re
 
-WEEK = "03"
+WEEK = "06"
 
 class DiscordUser():
     tag: str
@@ -25,7 +25,7 @@ def get_week():
     current_date = datetime.now()
     
     # Remember to update as holidays are added
-    delta_days = (current_date - datetime(2024, 5, 26)).days
+    delta_days = (current_date - datetime(2024, 6, 16)).days
     
     weeks_passed = delta_days // 7
 
