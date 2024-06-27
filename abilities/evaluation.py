@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import requests
 import re
 
-WEEK = "06"
+WEEK = 6
 
 class DiscordUser():
     tag: str
@@ -29,7 +29,7 @@ def get_week():
     
     weeks_passed = delta_days // 7
 
-    return str(4 + weeks_passed).zfill(2)
+    return str(WEEK + weeks_passed).zfill(2)
 
 
 class EvaluationScraper:
