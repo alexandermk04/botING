@@ -19,6 +19,7 @@ DISCORD_TO_TAG = {
     "bl3x": DiscordUser("cnm5281", "G7", "BogoSort"),
     "sixseveneight": DiscordUser("cci0492", "G7", "BogoSort"),
     "eagleplay.exe": DiscordUser("cgj4967", "G7", "BogoSort"),
+    "larswee": DiscordUser("cub2549", "G3", "SegFault")
 }
 
 def get_week():
