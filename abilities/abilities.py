@@ -19,11 +19,11 @@ class Conversation(BaseAbility):
 class ShowHelp(BaseAbility):
     async def execute(self, recipient, **kwargs):
         await send_message(recipient, "Probiere einen der folgenden Commands aus:\n"
-                                      "!prüfungen verfügbar\n"
-                                      "!prüfungstermine\n"
+                                      #"!prüfungen verfügbar\n"
+                                      #"!prüfungstermine\n"
                                       "!mensa heute\n"
                                       "!mensa morgen\n"
-                                      "!campus")
+                                      "!campus plan")
 
 class ExamAvailability(BaseAbility):
     async def execute(self, recipient, **kwargs):
@@ -38,6 +38,7 @@ class ExamAvailability(BaseAbility):
 
 class ExamDates(BaseAbility):
     async def execute(self, recipient, user_message, **kwargs):
+
         try:
             scraper = ExamScraper()
             exams = scraper.find_exam(user_message)
@@ -84,10 +85,10 @@ class Plan(BaseAbility):
         except:
             await send_message(recipient, "Fehler beim Senden des Campusplans.")
 
-ABILITIES = {"prüfungen verfügbar": ExamAvailability(),
-             "prüfungstermine": ExamDates(),
-             "oop": OOPEvaluation(),
+
+ABILITIES = {#"prüfungen verfügbar": ExamAvailability(),
+             #"prüfungstermine": ExamDates(),
              "mensa heute": MealsToday(),
              "mensa morgen": MealsTomorrow(),
-             "conversation": Conversation(),
-             "campus": Plan()}
+             "konversation": Conversation(),
+             "campus plan": Plan()}

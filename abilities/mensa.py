@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from bs4 import BeautifulSoup
 import requests
 import re
+
 
 class MensaScraper:
     page_to_scrape = None
@@ -65,6 +68,9 @@ class MensaScraper:
         start_message = f"Hier sind die Gerichte für {self.day}:\n\n"
         meal_messages = [self.format_single_meal(meal) for meal in meals]
         response = start_message + "\n".join(meal_messages)
+
+        if datetime.today() < datetime(2025, 1, 6) and datetime.today() > datetime(2024, 12, 20):
+            return self.holiday_message()
         return response
 
     def format_single_meal(self, meal: dict) -> str:
@@ -72,3 +78,6 @@ class MensaScraper:
             return f"**Pasta & Gemüsebar ({meal['price']} / 100g):**\n{meal['name']}\n"
         else:
             return f"**{meal['name']}**\n{meal['price']}\n"
+        
+    def holiday_message(self):
+        return "Die Mensa ist bis zum 6. Januar 2025 geschlossen. Frohe Feiertage!"
