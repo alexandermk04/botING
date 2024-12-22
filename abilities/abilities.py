@@ -18,11 +18,11 @@ class Conversation(BaseAbility):
 class ShowHelp(BaseAbility):
     async def execute(self, recipient, **kwargs):
         await send_message(recipient, "Probiere einen der folgenden Commands aus:\n"
-                                      "!prüfungen verfügbar\n"
-                                      "!prüfungstermine\n"
+                                      #"!prüfungen verfügbar\n"
+                                      #"!prüfungstermine\n"
                                       "!mensa heute\n"
                                       "!mensa morgen\n"
-                                      "!campus")
+                                      "!campus plan")
 
 class ExamAvailability(BaseAbility):
     async def execute(self, recipient, **kwargs):
@@ -35,7 +35,7 @@ class ExamAvailability(BaseAbility):
 class ExamDates(BaseAbility):
     async def execute(self, recipient, user_message, **kwargs):
         scraper = ExamScraper()
-        exams = scraper.find_exam(user_message)
+        exams = scraper.find_exam(user_message) 
 
         if exams:
             prompt = "Supply the user with the most relevant exam date as well as the name of the following:"
@@ -59,9 +59,9 @@ class Plan(BaseAbility):
     async def execute(self, recipient, user_message, **kwargs):
         await send_file(recipient, "Hier ist der Campusplan:", PLAN_PATH)
 
-ABILITIES = {"prüfungen verfügbar": ExamAvailability(),
-             "prüfungstermine": ExamDates(),
+ABILITIES = {#"prüfungen verfügbar": ExamAvailability(),
+             #"prüfungstermine": ExamDates(),
              "mensa heute": MealsToday(),
              "mensa morgen": MealsTomorrow(),
-             "conversation": Conversation(),
-             "campus": Plan()}
+             "konversation": Conversation(),
+             "campus plan": Plan()}
