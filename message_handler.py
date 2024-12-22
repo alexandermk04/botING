@@ -45,14 +45,16 @@ class MessageHandler:
             command = self.recognize_command()
             if command:
                 return await command.execute(recipient=self.message.channel,
-                                             user_message=self.user_message)
+                                             user_message=self.user_message,
+                                             username=self.username)
             else:
                 return await ShowHelp().execute(recipient=self.message.channel)
         else:
             ability = self.recognize_ability()
             if ability:
                 return await ability.execute(recipient=self.message.channel,
-                                              user_message=self.user_message)
+                                              user_message=self.user_message,
+                                              username=self.username)
             else:
                 return await ai_answer(recipient=self.message.channel, user_message=self.user_message)
         

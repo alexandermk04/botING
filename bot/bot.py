@@ -1,6 +1,7 @@
 import discord
 import logging
 
+
 from config import DISCORD_TOKEN
 from message_handler import MessageHandler
 
