@@ -9,9 +9,13 @@ class MensaScraper:
     page_to_scrape = None
     soup: BeautifulSoup = None
     day: str
+    location_id: str
+    style: str
 
-    def __init__(self, day="heute"):
+    def __init__(self, day="heute", location_id="158", style="md"):
         self.day = day
+        self.location_id = location_id
+        self.style = style
         if self.day == "morgen":
             self.page_to_scrape = requests.get("https://www.stwhh.de/speiseplan?t=next_day")
         else:
@@ -36,7 +40,7 @@ class MensaScraper:
     def find_correct_location(self):
         rows = self.soup.find_all("div", class_="container-fluid px-0 tx-epwerkmenu-menu-location-container")
         for row in rows:
-            if row.get("data-location-id") == "158":
+            if row.get("data-location-id") == self.location_id:
                 return row
 
     def extract_meals(self, row):
@@ -59,25 +63,84 @@ class MensaScraper:
                 if price_span:
                     meal_price = price_span.text.strip()
 
-        return {"name": self.clean_meal_name(meal_name), "price": meal_price}
+        result = {"name": self.clean_meal_name(meal_name), "price": meal_price, "vegan": False}
+
+        # Search for vegan tooltip
+        icon_tooltips = meal_block.findAll("span", class_="singlemeal__icontooltip")
+        for tooltip in icon_tooltips:
+            text = tooltip.get('title')
+            if text:
+                if "vegan" in text.lower():
+                    result["vegan"] = True
+
+        return result
     
     def clean_meal_name(self, meal_name):
         return re.sub(r'\s*\([^)]*\)', '', meal_name)
     
     def format_meals(self, meals: list[dict]) -> str:
+        if self.style == "md":
+            return self.format_meals_md(meals)
+        elif self.style == "html":
+            return self.format_meals_html(meals)
+        else:
+            raise ValueError("Invalid style")
+    
+    def format_meals_md(self, meals: list[dict]) -> str:
         start_message = f"Hier sind die Gerichte für {self.day}:\n\n"
-        meal_messages = [self.format_single_meal(meal) for meal in meals]
+        meal_messages = [self.format_single_meal_md(meal) for meal in meals]
         response = start_message + "\n".join(meal_messages)
 
-        if datetime.today() < datetime(2025, 1, 6) and datetime.today() > datetime(2024, 12, 20):
-            return self.holiday_message()
+        return response
+    
+    def format_meals_html(self, meals: list[dict]) -> str:
+        start_message = f"<h1>Hier sind die Gerichte für {self.day}:</h1>"
+        meal_message = "".join([self.format_single_meal_html(meal) for meal in meals])
+        response = self.email_body(start_message + meal_message)
+
         return response
 
-    def format_single_meal(self, meal: dict) -> str:
-        if meal["price"] == "0,75 €":
+    def format_single_meal_md(self, meal: dict) -> str:
+        if meal["price"] == "0,85 €":
             return f"**Pasta & Gemüsebar ({meal['price']} / 100g):**\n{meal['name']}\n"
         else:
             return f"**{meal['name']}**\n{meal['price']}\n"
         
-    def holiday_message(self):
-        return "Die Mensa ist bis zum 6. Januar 2025 geschlossen. Frohe Feiertage!"
+    def format_single_meal_html(self, meal: dict) -> str:
+        if meal["name"] == "Dummy Hauptkomponente":
+            return ""
+        if meal["price"] == "0,85 €":
+            text = f"<p><strong>{meal['name']}</strong><br>Pasta & Gemüsebar ({meal['price']} / 100g):"
+        else:
+            text =  f"<p><strong>{meal['name']}</strong><br>{meal['price']}"
+        if meal["vegan"]:
+            text += "<br><strong>Vegan</strong>"
+
+        # Close the paragraph
+        text += "</p>"
+        return text
+        
+    def email_body(self, content: str):
+        html_body = f"""
+        <html>
+            <head>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                    }}
+                    p {{
+                        margin: 10px 0;
+                    }}
+                    strong {{
+                        color: #007BFF;  /* Example: Blue for emphasis */
+                    }}
+                </style>
+            </head>
+            <body>
+                {content}
+            </body>
+        </html>
+        """
+        return html_body
