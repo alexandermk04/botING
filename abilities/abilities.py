@@ -3,7 +3,7 @@ from ai_models.ai_anthropic import ai_answer
 from abilities.exams import ExamScraper
 from abilities.mensa import MensaScraper
 from abilities.evaluation import EvaluationScraper
-from config import PLAN_PATH
+from config import PLAN_PATH, PAYPAL
 
 class BaseAbility:
     def __init__(self) -> None:
@@ -12,18 +12,17 @@ class BaseAbility:
     async def execute(self, recipient, **kwargs):
         pass
 
-class Conversation(BaseAbility):
-    async def execute(self, recipient, user_message, **kwargs):
-        await ai_answer(recipient, user_message)
-
 class ShowHelp(BaseAbility):
     async def execute(self, recipient, **kwargs):
-        await send_message(recipient, "Probiere einen der folgenden Commands aus:\n"
-                                      #"!prüfungen verfügbar\n"
-                                      #"!prüfungstermine\n"
-                                      "!mensa heute\n"
-                                      "!mensa morgen\n"
-                                      "!campus plan")
+        await send_message(recipient, f"""
+Hallo! Die AI-Funktion ist aktuell deaktiviert, da sie 5$ pro Jahr kostet.
+Wenn du an einer Reaktivierung interessiert bist, kannst du mich auf Paypal unterstützen: **@{PAYPAL}**
+
+Ansonsten stehen dir folgende Commands zur Verfügung:
+!essen heute
+!essen morgen
+!campus plan
+""")
 
 class ExamAvailability(BaseAbility):
     async def execute(self, recipient, **kwargs):
@@ -88,7 +87,6 @@ class Plan(BaseAbility):
 
 ABILITIES = {#"prüfungen verfügbar": ExamAvailability(),
              #"prüfungstermine": ExamDates(),
-             "mensa heute": MealsToday(),
-             "mensa morgen": MealsTomorrow(),
-             "konversation": Conversation(),
+             "essen heute": MealsToday(),
+             "essen morgen": MealsTomorrow(),
              "campus plan": Plan()}

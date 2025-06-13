@@ -56,25 +56,34 @@ class MessageHandler:
                                               user_message=self.user_message,
                                               username=self.username)
             else:
-                return await ai_answer(recipient=self.message.channel, user_message=self.user_message)
+                try: # try to use AI, otherwise manual fallback
+                    answer = await ai_answer(recipient=self.message.channel, user_message=self.user_message)
+                    return answer
+                except Exception as e:
+                    return await ShowHelp().execute(recipient=self.message.channel)
         
     def recognize_command(self):
         cleaned_message = self.user_message[1:].strip()
         command = ABILITIES.get(cleaned_message)
 
         return command   
-        
-    def recognize_ability(self):
-        response = prompt_chat(INTENT_PROMPT, self.user_message)
-        if response == "None":
-            return None
-        else:
-            try:
-                return ABILITIES.get(response)
-            except KeyError as e:
-                logger.error(e)
-                return None
-
     
-
+    def recognize_ability(self):
+        try: # AI
+            response = prompt_chat(INTENT_PROMPT, self.user_message)
+            if response == "None":
+                return None
+            else:
+                try:
+                    return ABILITIES.get(response)
+                except KeyError as e:
+                    logger.error(e)
+                    return None
+        except Exception as e: # Manual fallback
+            if "essen" in self.user_message.lower():
+                return ABILITIES.get("essen heute")
+            elif "plan" in self.user_message.lower():
+                return ABILITIES.get("campus plan")
+            else:
+                return None
     
