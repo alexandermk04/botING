@@ -7,7 +7,7 @@ from message_handler import MessageHandler
 
 logger = logging.getLogger(__name__)
 
-async def run_discord_bot():
+def run_discord_bot():
     
     intents = discord.Intents.default()
     intents.message_content = True
@@ -24,6 +24,6 @@ async def run_discord_bot():
             return
         await MessageHandler(message).answer()
 
-    await client.start(DISCORD_TOKEN)
+    client.run(DISCORD_TOKEN)
 
     
