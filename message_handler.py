@@ -1,17 +1,17 @@
 import logging
+import datetime
 
-from abilities.abilities import ABILITIES, ShowHelp
+from abilities.abilities import ShowHelp
 from bot.basic_functions import send_message
-from ai_models.ai_anthropic import prompt_chat, ai_answer
+from ai_models.ai_gemini import create_answer
+from dto import Conversation, Message
 
 logger = logging.getLogger(__name__)
 
-CHANNELS = ["bot-ing", "Direct Message with Unknown User"]
+HISTORY_LENGTH = 5
+TIME_CUTOFF_MINUTES = 2
 
-INTENT_PROMPT = f"""You're an assistant trying to supply the most relevant information to the user.
-                You can execute the following functions:
-                {', '.join(ABILITIES.keys())}
-                Only reply with the name of the function that is most relevant to the user's message or simply 'None'."""
+CHANNELS = ["bot-ing", "Direct Message with Unknown User"]
 
 class MessageHandler:
     username: str
@@ -28,62 +28,40 @@ class MessageHandler:
 
         logger.info(f"{self.username} said {self.user_message} in {self.channel}")
 
-        self.recognize_type()
-
-    def recognize_type(self):
-        if self.user_message[0] == "!":
-            self.type = "command"
-        else:
-            self.type = "message"
-
     async def answer(self):
         if self.channel not in CHANNELS:
             logger.info(f"{self.channel} not allowed.")
             return
         
-        if self.type == "command":
-            command = self.recognize_command()
-            if command:
-                return await command.execute(recipient=self.message.channel,
-                                             user_message=self.user_message,
-                                             username=self.username)
-            else:
-                return await ShowHelp().execute(recipient=self.message.channel)
-        else:
-            ability = self.recognize_ability()
-            if ability:
-                return await ability.execute(recipient=self.message.channel,
-                                              user_message=self.user_message,
-                                              username=self.username)
-            else:
-                try: # try to use AI, otherwise manual fallback
-                    answer = await ai_answer(recipient=self.message.channel, user_message=self.user_message)
-                    return answer
-                except Exception as e:
-                    return await ShowHelp().execute(recipient=self.message.channel)
-        
-    def recognize_command(self):
-        cleaned_message = self.user_message[1:].strip()
-        command = ABILITIES.get(cleaned_message)
+        try:
+            conversation = await self.construct_conversation()
+            answer = await create_answer(conversation, recipient=self.message.channel)
 
-        return command   
+            if answer is not None:
+                return await send_message(self.message.channel, answer)
+        except Exception as e:
+            logger.error(f"Error in AI response: {e}")
+        return await ShowHelp(self.message.channel).show_help()
     
-    def recognize_ability(self):
-        try: # AI
-            response = prompt_chat(INTENT_PROMPT, self.user_message)
-            if response == "None":
-                return None
-            else:
-                try:
-                    return ABILITIES.get(response)
-                except KeyError as e:
-                    logger.error(e)
-                    return None
-        except Exception as e: # Manual fallback
-            if "essen" in self.user_message.lower():
-                return ABILITIES.get("essen heute")
-            elif "plan" in self.user_message.lower():
-                return ABILITIES.get("campus plan")
-            else:
-                return None
+    async def construct_conversation(self) -> Conversation:
+        message = Message(
+            content=self.user_message,
+            author=self.username
+        )
+
+        cutoff_time = self.message.created_at - datetime.timedelta(minutes=TIME_CUTOFF_MINUTES)
+
+        history_msg = []
+        async for msg in self.message.channel.history(limit=HISTORY_LENGTH, before=self.message):
+            if msg.created_at > cutoff_time:
+                history_msg.append(msg)
+
+        history_msg.reverse()
+
+        history = [Message(content=msg.content, author=msg.author.name) for msg in history_msg]
+
+        return Conversation(
+            message=message,
+            history=history
+        )
     

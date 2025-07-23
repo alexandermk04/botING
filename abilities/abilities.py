@@ -1,92 +1,83 @@
 from bot.basic_functions import send_message, send_file
-from ai_models.ai_anthropic import ai_answer
 from abilities.exams import ExamScraper
 from abilities.mensa import MensaScraper
-from abilities.evaluation import EvaluationScraper
 from config import PLAN_PATH, PAYPAL
 
 class BaseAbility:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, recipient) -> None:
+        self.recipient = recipient
 
-    async def execute(self, recipient, **kwargs):
-        pass
+    async def execute(self, **kwargs):
+        raise NotImplementedError("This method should be overridden by subclasses.")
 
 class ShowHelp(BaseAbility):
-    async def execute(self, recipient, **kwargs):
-        await send_message(recipient, f"""
-Hallo! Die AI-Funktion ist aktuell deaktiviert, da sie 5$ pro Jahr kostet.
-Wenn du an einer Reaktivierung interessiert bist, kannst du mich auf Paypal unterstützen: **@{PAYPAL}**
+    def __init__(self, recipient):
+        super().__init__(recipient)
 
-Ansonsten stehen dir folgende Commands zur Verfügung:
-!essen heute
-!essen morgen
-!campus plan
+    async def show_help(self):
+        """Show help message with available commands and features."""
+        await send_message(self.recipient, f"""
+Ein Fehler ist aufgetreten. Bitte versuche es später erneut.
 """)
+        return "Help message sent."
 
 class ExamAvailability(BaseAbility):
-    async def execute(self, recipient, **kwargs):
+    def __init__(self, recipient):
+        super().__init__(recipient)
+
+    async def show_exam_availability(self):
+        """Informs the user about whether the exam dates are available."""
+
         try:
             scraper = ExamScraper()
             if scraper.exams_available():
-                await send_message(recipient, "Prüfungen sind verfügbar!")
+                await send_message(self.recipient, "Prüfungen sind verfügbar!")
             else:
-                await send_message(recipient, "Keine Prüfungen verfügbar!")
+                await send_message(self.recipient, "Keine Prüfungen verfügbar!")
+            
+            return "Exam availability message sent."
         except:
-            await send_message(recipient, "Fehler beim Abrufen der Prüfungen.")
+            await send_message(self.recipient, "Fehler beim Abrufen der Prüfungen.")
+
+            return "Error retrieving exam availability."
 
 class ExamDates(BaseAbility):
-    async def execute(self, recipient, user_message, **kwargs):
+    def __init__(self, recipient):
+        super().__init__(recipient)
 
+    async def gather_exam_dates(self):
+        """Retrieves all the available exam dates."""
         try:
             scraper = ExamScraper()
-            exams = scraper.find_exam(user_message)
-
-            if exams:
-                prompt = "Supply the user with the most relevant exam date as well as the name of the following:"
-                exams_string = "\n".join([f"{exam[0]} at {exam[1]}" for exam in exams])
-                #response = prompt_chat(prompt + exams_string, user_message)
-                await send_message(recipient, exams_string)
+            return scraper.get_exams()
         except:
-            await send_message(recipient, "Fehler beim Abrufen der Prüfungstermine.")
+            return "Error retrieving exam dates."
 
-class OOPEvaluation(BaseAbility):
-    async def execute(self, recipient, username, **kwargs):
+class MensaPlan(BaseAbility):
+    def __init__(self, recipient):
+        super().__init__(recipient)
+
+    async def send_meals(self, day: str):
+        """Sends the meals available at the given day in the Mensa to the user.
+        Args:
+            day (str): The day for which to retrieve meals, must be either "heute" or "morgen".
+        """
         try:
-            await send_message(recipient, f"Suche nach Evaluation für {username}. Dies kann etwas dauern...")
-            response = EvaluationScraper(username).get_evaluation()
-            await send_message(recipient, response)
+            meals = MensaScraper(day).get_meals()
+            await send_message(self.recipient, meals)
+            return f"Meals for {day} sent."
         except:
-            await send_message(recipient, "Fehler bei der Evaluationssuche.")
+            await send_message(self.recipient, "Fehler beim Abrufen der Mensa-Speisekarte.")
+            return "Error retrieving today's meals."
 
-class MealsToday(BaseAbility):
+class CampusPlan(BaseAbility):
+    def __init__(self, recipient):
+        super().__init__(recipient)
 
-    async def execute(self, recipient, **kwargs):
+    async def send_campus_plan(self):
         try:
-            meals = MensaScraper("heute").get_meals()
-            await send_message(recipient, meals)
+            await send_file(self.recipient, "Hier ist der Campusplan:", PLAN_PATH)
+            return "Campus plan sent."
         except:
-            await send_message(recipient, "Fehler beim Abrufen der Mensa-Speisekarte.")
-
-class MealsTomorrow(BaseAbility):
-
-    async def execute(self, recipient, **kwargs):
-        try:
-            meals = MensaScraper("morgen").get_meals()
-            await send_message(recipient, meals)
-        except:
-            await send_message(recipient, "Fehler beim Abrufen der Mensa-Speisekarte.")
-
-class Plan(BaseAbility):
-    async def execute(self, recipient, **kwargs):
-        try:
-            await send_file(recipient, "Hier ist der Campusplan:", PLAN_PATH)
-        except:
-            await send_message(recipient, "Fehler beim Senden des Campusplans.")
-
-
-ABILITIES = {#"prüfungen verfügbar": ExamAvailability(),
-             #"prüfungstermine": ExamDates(),
-             "essen heute": MealsToday(),
-             "essen morgen": MealsTomorrow(),
-             "campus plan": Plan()}
+            await send_message(self.recipient, "Fehler beim Senden des Campusplans.")
+            return "Error sending campus plan."

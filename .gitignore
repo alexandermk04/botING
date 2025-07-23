@@ -1,4 +1,6 @@
 .env
+# Google Project Key
+*.json
 
 # Testing notebooks #
 #####################
