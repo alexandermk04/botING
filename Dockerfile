@@ -13,4 +13,6 @@ RUN apt-get update && \
 
 HEALTHCHECK NONE
 
-CMD ["python", "main.py"]
+RUN chmod +x ./decode_service_key.sh
+
+CMD ["sh", "-c", "./decode_service_key.sh && python main.py"]

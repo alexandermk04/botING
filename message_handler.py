@@ -22,6 +22,7 @@ class MessageHandler:
 
     def __init__(self, message):
         self.username = str(message.author)
+        self.user_id = str(message.author.id)
         self.user_message = str(message.content)[:200]
         self.channel = str(message.channel)
         self.message = message
@@ -41,12 +42,13 @@ class MessageHandler:
                 return await send_message(self.message.channel, answer)
         except Exception as e:
             logger.error(f"Error in AI response: {e}")
-        return await ShowHelp(self.message.channel).show_help()
+            return await ShowHelp(self.message.channel).show_help()
     
     async def construct_conversation(self) -> Conversation:
         message = Message(
             content=self.user_message,
-            author=self.username
+            author=self.username,
+            user_id=self.user_id
         )
 
         cutoff_time = self.message.created_at - datetime.timedelta(minutes=TIME_CUTOFF_MINUTES)
