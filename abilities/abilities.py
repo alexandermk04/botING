@@ -70,7 +70,7 @@ class MensaPlan(BaseAbility):
             You can nonetheless use an ID provided by the user.
         """
         try:
-            meals = MensaScraper(day, mensa_id=mensa_id).get_meals()
+            meals = MensaScraper(day, location_id=mensa_id).get_meals()
             await send_message(self.recipient, meals)
             return f"Meals for {day} sent."
         except:
