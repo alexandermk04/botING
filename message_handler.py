@@ -42,7 +42,7 @@ class MessageHandler:
                 return await send_message(self.message.channel, answer)
         except Exception as e:
             logger.error(f"Error in AI response: {e}")
-        return await ShowHelp(self.message.channel).show_help()
+            return await ShowHelp(self.message.channel).show_help()
     
     async def construct_conversation(self) -> Conversation:
         message = Message(
