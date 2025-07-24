@@ -61,7 +61,7 @@ class MensaPlan(BaseAbility):
         """Sends the meals available at the given day in the Mensa to the user.
         Args:
             day (str): The day for which to retrieve meals, must be either "heute" or "morgen".
-            mensa_id (str): The ID of the Mensa location to retrieve meals from.
+            mensa_id (str): The ID of the Mensa location to retrieve meals from, for example "158".
             Popular IDs are:
                 "TUHH": "158",
                 "Finkenau": "164",
