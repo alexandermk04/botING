@@ -14,3 +14,5 @@ PAYPAL = os.getenv("PAYPAL")
 SENDER = os.getenv("SENDER")
 APP_PASSWORD = os.getenv("APP_PASSWORD")
 RECEIVER = os.getenv("RECEIVER")
+
+FIREBASE_PATH = os.getenv("FIREBASE_PATH")

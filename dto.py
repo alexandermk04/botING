@@ -4,6 +4,7 @@ from dataclasses import dataclass
 class Message:
     content: str
     author: str
+    user_id: str | None = None
 
 @dataclass
 class Conversation:
