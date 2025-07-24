@@ -1,7 +1,7 @@
 from bot.basic_functions import send_message, send_file
 from abilities.exams import ExamScraper
 from abilities.mensa import MensaScraper
-from config import PLAN_PATH, PAYPAL
+from config import PLAN_PATH
 
 class BaseAbility:
     def __init__(self, recipient) -> None:
@@ -57,13 +57,20 @@ class MensaPlan(BaseAbility):
     def __init__(self, recipient):
         super().__init__(recipient)
 
-    async def send_meals(self, day: str):
+    async def send_meals(self, day: str, mensa_id: str):
         """Sends the meals available at the given day in the Mensa to the user.
         Args:
             day (str): The day for which to retrieve meals, must be either "heute" or "morgen".
+            mensa_id (str): The ID of the Mensa location to retrieve meals from.
+            Popular IDs are:
+                "TUHH": "158",
+                "Finkenau": "164",
+                "Mensa Philturm, Standort Staatsbibliothek": "154",
+                "Mensa Studierendenhaus, Standort Staatsbibliothek": "137"
+            You can nonetheless use an ID provided by the user.
         """
         try:
-            meals = MensaScraper(day).get_meals()
+            meals = MensaScraper(day, mensa_id=mensa_id).get_meals()
             await send_message(self.recipient, meals)
             return f"Meals for {day} sent."
         except:
