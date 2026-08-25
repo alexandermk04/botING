@@ -101,7 +101,7 @@ class MensaScraper:
         return response
 
     def format_single_meal_md(self, meal: dict) -> str:
-        if meal["price"] == "0,85 €":
+        if meal["price"] == "0,90 €":
             return f"**Pasta & Gemüsebar ({meal['price']} / 100g):**\n{meal['name']}\n"
         else:
             return f"**{meal['name']}**\n{meal['price']}\n"
@@ -109,7 +109,7 @@ class MensaScraper:
     def format_single_meal_html(self, meal: dict) -> str:
         if meal["name"] == "Dummy Hauptkomponente":
             return ""
-        if meal["price"] == "0,85 €":
+        if meal["price"] == "0,90 €":
             text = f"<p><strong>{meal['name']}</strong><br>Pasta & Gemüsebar ({meal['price']} / 100g):"
         else:
             text =  f"<p><strong>{meal['name']}</strong><br>{meal['price']}"
