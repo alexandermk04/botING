@@ -22,7 +22,7 @@ from abilities.abilities import (
 from abilities.user_memory import UserMemory
 
 APP_NAME = "BotING"
-MODEL_NAME = "gemini-2.5-flash-lite"
+MODEL_NAME = "gemini-3.5-flash-lite"
 AGENT_SESSION = "agent_session"
 
 def gather_abilities(user_id, recipient) -> list[BaseAbility]:

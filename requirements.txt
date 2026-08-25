@@ -32,6 +32,9 @@ firebase_admin==6.9.0
 frozenlist==1.4.1
 fsspec==2024.3.1
 google-adk==1.7.0
+# NOTE: google-api-core>=2.35.0 percent-encodes path template vars, turning the
+# Firestore database id '(default)' into '%28default%29' -> 400 Invalid database id.
+# Keep this <2.35.0 until google-cloud-firestore ships a fix.
 google-api-core==2.25.1
 google-api-python-client==2.176.0
 google-auth==2.40.3
